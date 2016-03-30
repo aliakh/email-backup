@@ -1,0 +1,64 @@
+buildscript {
+    ext.kotlin_version = '0.14.451'
+    repositories {
+        mavenCentral()
+        maven {
+            url 'http://oss.sonatype.org/content/repositories/snapshots'
+        }
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+apply plugin: 'kotlin'
+apply plugin: 'application'
+
+version = '1.0'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+mainClassName = 'demo.EmailBackup'
+
+defaultTasks 'build'
+
+jar {
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+}
+
+defaultTasks 'fatJar'
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+    baseName = project.name
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+artifacts {
+    archives fatJar
+}
+
+sourceSets {
+    main.java.srcDirs += 'src/main/kotlin'
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'http://oss.sonatype.org/content/repositories/snapshots'
+    }
+}
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile 'commons-cli:commons-cli:1.2'
+    compile 'javax.mail:mail:1.4.7'
+    compile 'com.google.guava:guava:16.0.1'
+    testCompile 'org.testng:testng:6.9.6'
+    testCompile 'com.icegreen:greenmail:1.4.1'
+}
